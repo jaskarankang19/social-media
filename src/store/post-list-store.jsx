@@ -6,6 +6,7 @@ export const PostListContext = createContext({
   postList: [],
   addPost: () => {},
   deletePost: () => {},
+  addInitialPosts: () => {},
 });
 
 const postListReducer = (currentPostList, action) => {
@@ -16,16 +17,15 @@ const postListReducer = (currentPostList, action) => {
     );
   } else if (action.type === "ADD_POST") {
     newPostList = [action.payload, ...currentPostList];
+  } else if (action.type === "ADD_INITIAL_POSTS") {
+    newPostList = action.payload.posts;
   }
   return newPostList;
 };
 
 //a component that can render all the children and use the context
 const PostListProvider = ({ children }) => {
-  const [postList, dispatchPostList] = useReducer(
-    postListReducer,
-    DEFAULT_POSTLIST
-  );
+  const [postList, dispatchPostList] = useReducer(postListReducer, []);
   const addPost = (userId, postTitle, postBody, reactions, tags) => {
     const addAction = {
       type: "ADD_POST",
@@ -40,6 +40,15 @@ const PostListProvider = ({ children }) => {
     };
     dispatchPostList(addAction);
   };
+  const addInitialPosts = (posts) => {
+    const addInitialAction = {
+      type: "ADD_INITIAL_POSTS",
+      payload: {
+        posts: posts,
+      },
+    };
+    dispatchPostList(addInitialAction);
+  };
 
   const deletePost = (id) => {
     const deleteAction = {
@@ -49,29 +58,12 @@ const PostListProvider = ({ children }) => {
     dispatchPostList(deleteAction);
   };
   return (
-    <PostListContext.Provider value={{ postList, addPost, deletePost }}>
+    <PostListContext.Provider
+      value={{ postList, addPost, deletePost, addInitialPosts }}
+    >
       {children}
     </PostListContext.Provider>
   );
 };
-
-const DEFAULT_POSTLIST = [
-  {
-    id: "1",
-    title: "Going to Toronto",
-    body: "Today I am going to Toronto to watch Leafs game. ",
-    reactions: 2,
-    userId: "user-1",
-    tags: ["goleafsgo", "hockey"],
-  },
-  {
-    id: "2",
-    title: "Going to Wonderland",
-    body: "Today I am going to Wonderland!! ",
-    reactions: 6,
-    userId: "user-2",
-    tags: ["striker", "slides"],
-  },
-];
 
 export default PostListProvider;
