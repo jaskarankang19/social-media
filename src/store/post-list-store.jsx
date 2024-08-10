@@ -1,12 +1,12 @@
-import { useReducer } from "react";
+import { useState, useEffect, useReducer } from "react";
 import { createContext } from "react";
 
 //this a global context
 export const PostListContext = createContext({
   postList: [],
+  fetching: false,
   addPost: () => {},
   deletePost: () => {},
-  addInitialPosts: () => {},
 });
 
 const postListReducer = (currentPostList, action) => {
@@ -16,7 +16,7 @@ const postListReducer = (currentPostList, action) => {
       (post) => post.id !== action.payload.id
     );
   } else if (action.type === "ADD_POST") {
-    newPostList = [action.payload, ...currentPostList];
+    newPostList = [action.payload.post, ...currentPostList];
   } else if (action.type === "ADD_INITIAL_POSTS") {
     newPostList = action.payload.posts;
   }
@@ -26,16 +26,14 @@ const postListReducer = (currentPostList, action) => {
 //a component that can render all the children and use the context
 const PostListProvider = ({ children }) => {
   const [postList, dispatchPostList] = useReducer(postListReducer, []);
-  const addPost = (userId, postTitle, postBody, reactions, tags) => {
+
+  const [fetching, setFetching] = useState(false);
+
+  const addPost = (post) => {
     const addAction = {
       type: "ADD_POST",
       payload: {
-        id: Date.Now,
-        title: postTitle,
-        body: postBody,
-        reactions: reactions,
-        userId: userId,
-        tags: tags,
+        post,
       },
     };
     dispatchPostList(addAction);
@@ -57,9 +55,26 @@ const PostListProvider = ({ children }) => {
     };
     dispatchPostList(deleteAction);
   };
+
+  useEffect(() => {
+    setFetching(true);
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    fetch("https://dummyjson.com/posts", { signal })
+      .then((res) => res.json())
+      .then((data) => {
+        addInitialPosts(data.posts);
+        setFetching(false);
+      });
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
   return (
     <PostListContext.Provider
-      value={{ postList, addPost, deletePost, addInitialPosts }}
+      value={{ postList, fetching, addPost, deletePost }}
     >
       {children}
     </PostListContext.Provider>
