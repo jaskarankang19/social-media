@@ -38,15 +38,15 @@ const PostListProvider = ({ children }) => {
     };
     dispatchPostList(addAction);
   };
-  const addInitialPosts = (posts) => {
-    const addInitialAction = {
-      type: "ADD_INITIAL_POSTS",
-      payload: {
-        posts: posts,
-      },
-    };
-    dispatchPostList(addInitialAction);
-  };
+  // const addInitialPosts = (posts) => {
+  //   const addInitialAction = {
+  //     type: "ADD_INITIAL_POSTS",
+  //     payload: {
+  //       posts: posts,
+  //     },
+  //   };
+  //   dispatchPostList(addInitialAction);
+  // };
 
   const deletePost = (id) => {
     const deleteAction = {
@@ -56,21 +56,21 @@ const PostListProvider = ({ children }) => {
     dispatchPostList(deleteAction);
   };
 
-  useEffect(() => {
-    setFetching(true);
-    const controller = new AbortController();
-    const signal = controller.signal;
+  // useEffect(() => {
+  //   setFetching(true);
+  //   const controller = new AbortController();
+  //   const signal = controller.signal;
 
-    fetch("https://dummyjson.com/posts", { signal })
-      .then((res) => res.json())
-      .then((data) => {
-        addInitialPosts(data.posts);
-        setFetching(false);
-      });
-    return () => {
-      controller.abort();
-    };
-  }, []);
+  //   fetch("https://dummyjson.com/posts", { signal })
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       addInitialPosts(data.posts);
+  //       setFetching(false);
+  //     });
+  //   return () => {
+  //     controller.abort();
+  //   };
+  // }, []);
 
   return (
     <PostListContext.Provider
